@@ -3,6 +3,9 @@ package com.noriental.utils;
 
 import javax.persistence.*;
 
+/**
+ * @author dongyl
+ */
 @Entity
 @Table(name = "entity_user_push_info")
 public class PushUserInfo {

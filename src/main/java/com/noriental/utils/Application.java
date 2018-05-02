@@ -21,6 +21,9 @@ import javax.annotation.Resource;
 import java.util.*;
 import java.util.concurrent.*;
 
+/**
+ * @author dongyl
+ */
 @SpringBootApplication
 public class Application implements CommandLineRunner {
     private static final Logger logger = LoggerFactory.getLogger(Application.class);
