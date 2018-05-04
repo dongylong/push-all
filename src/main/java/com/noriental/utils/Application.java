@@ -44,8 +44,8 @@ public class Application implements CommandLineRunner {
 
 
     static ExecutorService threadPool = new ThreadPoolExecutor(
-             1,
-             1,
+            1,
+            1,
             0L,
             TimeUnit.MICROSECONDS,
             new LinkedBlockingQueue<>(),
@@ -81,25 +81,16 @@ public class Application implements CommandLineRunner {
         logger.info("title:{}", title);
         Set<String> pushIdSet = new HashSet<>();
         Set<String> pushIdSetLimit = new HashSet<>();
-//        int cpuCore = Runtime.getRuntime().availableProcessors();
-//
-//        logger.info("cpuCore:{}", cpuCore);
-//        ExecutorService threadPool = new ThreadPoolExecutor(
-//                cpuCore+1,
-//                cpuCore+1,
-//                0L,
-//                TimeUnit.MICROSECONDS,
-//                new LinkedBlockingQueue<>(),
-//                new ThreadPoolExecutor.DiscardOldestPolicy());
-        //jpush 测试环境 限流1分钟600次。600*1000=600000。一分钟可以发送60万用户。
-        //jpush 生产环境 限流1分钟1200次。1200*1000=1200000。一分钟可以发送120万用户。用户量若达到120+需做delay或增加频率次数
         pushList.forEach(aPushList -> {
             String pushId = aPushList.getPushId();
             if (!pushIdSet.contains(pushId)) {
                 pushIdSet.add(pushId);
                 pushIdSetLimit.add(pushId);
                 if (pushLimit == pushIdSetLimit.size()) {
-                    String[] limitStr = pushIdSetLimit.toArray(new String[pushIdSetLimit.size()]);
+                    Set<String> send = new HashSet<>();
+                    send.addAll(pushIdSetLimit);
+                    pushIdSetLimit.clear();
+                    String[] limitStr = send.toArray(new String[send.size()]);
                     threadPool.execute(
                             () -> {
                                 try {
@@ -110,31 +101,9 @@ public class Application implements CommandLineRunner {
                                 }
                             }
                     );
-                    pushIdSetLimit.clear();
                 }
             }
         });
-//        for (PushUserInfo aPushList : pushList) {
-//            String pushId = aPushList.getPushId();
-//            if (!pushIdSet.contains(pushId)) {
-//                pushIdSet.add(pushId);
-//                pushIdSetLimit.add(pushId);
-//                if (pushLimit == pushIdSetLimit.size()) {
-//                    String[] limitStr = pushIdSetLimit.toArray(new String[pushIdSetLimit.size()]);
-//                    threadPool.execute(
-//                            () -> {
-//                                try {
-//                                    pushWithRegistrationID(alert, title, ex, limitStr);
-//                                } catch (Exception e) {
-//                                    logger.info("e:", e);
-//                                }
-//                            }
-//                    );
-//                    pushIdSetLimit.clear();
-//                }
-//            }
-//        }
-
         if (!CollectionUtils.isEmpty(pushIdSetLimit)) {
             try {
                 String[] limitStr = pushIdSetLimit.toArray(new String[pushIdSetLimit.size()]);
